@@ -1,588 +1,641 @@
-import React, { useState, useEffect } from 'react';
+<!DOCTYPE html>
+<html lang="or">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightMinds Academy - Tuition Center</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
 
-// Individual Icon Components for maximum stability
-const GraduationCapIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10 5-10 5-10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-);
+        .language-or {
+            line-height: 1.7;
+        }
 
-const TrophyIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-);
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
 
-const UsersIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-const StarIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-);
+        /* Accordion transition */
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
 
-const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-);
+        .faq-item.active .faq-content {
+            max-height: 200px;
+            padding: 1.5rem;
+        }
 
-const ChevronDownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-);
+        .faq-item.active .chevron-icon {
+            transform: rotate(180deg);
+        }
 
-const CheckCircleIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-);
+        /* Mobile menu transition */
+        #mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
 
-const AwardIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
-);
+        #mobile-menu.active {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
 
-const ShieldCheckIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-);
+    <!-- Icons Container (Hidden) -->
+    <div style="display: none;">
+        <svg id="icon-cap" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <svg id="icon-trophy" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <svg id="icon-users" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg id="icon-star" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg id="icon-chevron-right" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <svg id="icon-chevron-down" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        <svg id="icon-check" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <svg id="icon-award" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>
+        <svg id="icon-shield" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        <svg id="icon-menu" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        <svg id="icon-x" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </div>
 
-const MenuIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-);
-
-const XIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-);
-
-const translations = {
-  en: {
-    tagline: "Empowering Minds, Shaping Futures",
-    navGrades: "Grades",
-    navTeam: "Team",
-    navPricing: "Pricing",
-    navFaq: "FAQ",
-    bookDemo: "Book Demo",
-    badge: "Nursery to 10th Class Support",
-    heroTitle: "Unlock Excellence Every Single Day.",
-    heroSubtitle: "From first steps in Nursery to board exam excellence in 10th Class. Our generational expertise ensures your child succeeds at every milestone.",
-    startTrial: "Start Trial",
-    exploreGrades: "Explore Grades",
-    successRate: "98% Success Rate",
-    studentsCount: "10k+ Students",
-    subjects: "All Subjects Covered",
-    segmentsTitle: "Academic Segments We Cover",
-    nurseryUkg: "Nursery - UKG",
-    nurseryDesc: "Foundational Literacy & Play-way Learning",
-    class1_3: "Class 1 - 3",
-    class1_3Desc: "Basic Math, Reading & Creative Thinking",
-    class4_7: "Class 4 - 7",
-    class4_7Desc: "Conceptual Science & Logic Building",
-    class8_10: "Class 8 - 10",
-    class8_10Desc: "Board Prep & Advanced Competency",
-    facultyTitle: "The Sankhua Faculty",
-    facultySubtitle: "Generational Wisdom",
-    facultyQuote: '"We nurture learners from their very first day of school to their crucial board exams."',
-    pricingTitle: "Simple Pricing For All Classes",
-    monthly: "Monthly",
-    yearly: "Yearly",
-    save: "SAVE 20%",
-    perMonth: "/mo",
-    joinNow: "Join Program",
-    bestForResults: "Best for Results",
-    faqTitle: "Frequently Asked Questions",
-    footerText: "The Sankhua family legacy in education. Mentoring students from Nursery to Grade 10 since 1994.",
-    classBlocks: "Class Blocks",
-    newsletter: "Join our Newsletter",
-    parentEmail: "Parent's Email",
-    join: "Join",
-    modalTitle: "Book Your Free Demo",
-    modalSubtitle: "Choose a time that works for you",
-    fullName: "Full Name",
-    gradeLevel: "Student's Grade",
-    submit: "Send Request",
-    close: "Close"
-  },
-  or: {
-    tagline: "ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ ।",
-    navGrades: "ଶ୍ରେଣୀ",
-    navTeam: "ଟିମ୍",
-    navPricing: "ମୂଲ୍ୟ",
-    navFaq: "ପ୍ରଶ୍ନୋତ୍ତର",
-    bookDemo: "ଡେମୋ ବୁକ୍ କରନ୍ତୁ",
-    badge: "ନର୍ସରୀ ରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ",
-    heroTitle: "ପ୍ରତିଦିନ ଶ୍ରେଷ୍ଠତା ହାସଲ କରନ୍ତୁ ।",
-    heroSubtitle: "ନର୍ସରୀରୁ ଆରମ୍ଭ କରି ଦଶମ ଶ୍ରେଣୀ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ। ଆମର ବଂଶଗତ ଅଭିଜ୍ଞତା ଆପଣଙ୍କ ପିଲାଙ୍କୁ ପ୍ରତିଟି ସୋପାନରେ ସଫଳତା ପ୍ରଦାନ କରେ ।",
-    startTrial: "ଟ୍ରାଏଲ୍ ଆରମ୍ଭ କରନ୍ତୁ",
-    exploreGrades: "ଶ୍ରେଣୀ ଦେଖନ୍ତୁ",
-    successRate: "୯୮% ସଫଳତା ହାର",
-    studentsCount: "୧୦ ହଜାର+ ଛାତ୍ରଛାତ୍ରୀ",
-    subjects: "ସମସ୍ତ ବିଷୟ ଅନ୍ତର୍ଭୁକ୍ତ",
-    segmentsTitle: "ଆମେ ପ୍ରଦାନ କରୁଥିବା ଶିକ୍ଷା ସ୍ତର",
-    nurseryUkg: "ନର୍ସରୀ - UKG",
-    nurseryDesc: "ମୂଳଦୁଆ ଶିକ୍ଷା ଓ ଖେଳ ମାଧ୍ୟମରେ ପାଠପଢା",
-    class1_3: "ପ୍ରଥମ - ତୃତୀୟ ଶ୍ରେଣୀ",
-    class1_3Desc: "ସାଧାରଣ ଗଣିତ, ପଢିବା ଓ ସୃଜନଶୀଳ ଚିନ୍ତାଧାରା",
-    class4_7: "ଚତୁର୍ଥ - ସପ୍ତମ ଶ୍ରେଣୀ",
-    class4_7Desc: "ବିଜ୍ଞାନ ଓ ଯୁକ୍ତିଯୁକ୍ତ ଚିନ୍ତାଧାରାର ବିକାଶ",
-    class8_10: "ଅଷ୍ଟମ - ଦଶମ ଶ୍ରେଣୀ",
-    class8_10Desc: "ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଓ ଉନ୍ନତ ଶିକ୍ଷା",
-    facultyTitle: "ସାଂଖୁଆ ଶିକ୍ଷକ ମଣ୍ଡଳୀ",
-    facultySubtitle: "ବଂଶଗତ ଜ୍ଞାନ ଓ ଅଭିଜ୍ଞତା",
-    facultyQuote: '"ଆମେ ପିଲାମାନଙ୍କୁ ସ୍କୁଲର ପ୍ରଥମ ଦିନରୁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ୋ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ ଗଢିଥାଉ ।"',
-    pricingTitle: "ସମସ୍ତ ଶ୍ରେଣୀ ପାଇଁ ସରଳ ମୂଲ୍ୟ",
-    monthly: "ମାସିକ",
-    yearly: "ବାର୍ଷିକ",
-    save: "୨୦% ରିହାତି",
-    perMonth: "/ମାସ",
-    joinNow: "ଏବେ ଯୋଗ ଦିଅନ୍ତୁ",
-    bestForResults: "ସର୍ବୋତ୍ତମ ଫଳାଫଳ ପାଇଁ",
-    faqTitle: "ସାଧାରଣ ପ୍ରଶ୍ନୋତ୍ତର",
-    footerText: "ଶିକ୍ଷା କ୍ଷେତ୍ରରେ ସାଂଖୁଆ ପରିବାରର ପରମ୍ପରା। ୧୯୯୪ ରୁ ନର୍ସରୀରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ ପିଲାମାନଙ୍କୁ ମାର୍ଗଦର୍ଶନ।",
-    classBlocks: "ଶିକ୍ଷା ସ୍ତର",
-    newsletter: "ଆମ ସହ ଯୋଡି ହୁଅନ୍ତୁ",
-    parentEmail: "ପିତାମାତାଙ୍କ ଇମେଲ୍",
-    join: "ଯୋଡି ହୁଅନ୍ତୁ",
-    modalTitle: "ମାଗଣା ଡେମୋ ବୁକ୍ କରନ୍ତୁ",
-    modalSubtitle: "ଆପଣଙ୍କ ସୁବିଧା ଅନୁସାରେ ସମୟ ବାଛନ୍ତୁ",
-    fullName: "ପୂରା ନାମ",
-    gradeLevel: "ଛାତ୍ରଙ୍କ ଶ୍ରେଣୀ",
-    submit: "ପଠାନ୍ତୁ",
-    close: "ବନ୍ଦ କରନ୍ତୁ"
-  }
-};
-
-const FAQS = [
-  {
-    q: { en: "Do you provide one-on-one sessions?", or: "ଆପଣ ବ୍ୟକ୍ତିଗତ ଶ୍ରେଣୀ ପ୍ରଦାନ କରନ୍ତି କି?" },
-    a: { en: "Yes, our Premium plan includes dedicated one-on-one mentorship for personalized growth.", or: "ହଁ, ଆମର ପ୍ରିମିୟମ ପ୍ଲାନରେ ବ୍ୟକ୍ତିଗତ ବିକାଶ ପାଇଁ ସ୍ୱତନ୍ତ୍ର ଶିକ୍ଷାଦାନ ଅନ୍ତର୍ଭୁକ୍ତ ।" }
-  },
-  {
-    q: { en: "What subjects are covered for Class 10?", or: "ଦଶମ ଶ୍ରେଣୀ ପାଇଁ କେଉଁ ବିଷୟଗୁଡିକ ପଢାଯାଏ?" },
-    a: { en: "We cover Mathematics, Science, English, and Social Studies tailored to board requirements.", or: "ଆମେ ଗଣିତ, ବିଜ୍ଞାନ, ଇଂରାଜୀ ଏବଂ ସାମାଧିକ ବିଜ୍ଞାନ ବୋର୍ଡ ପରୀକ୍ଷା ପାଇଁ ପଢାଇଥାଉ ।" }
-  },
-  {
-    q: { en: "Is there a trial period?", or: "କିଛି ଟ୍ରାଏଲ୍ ଅବଧି ଅଛି କି?" },
-    a: { en: "Absolutely! We offer a 3-day free trial so you can experience our teaching style.", or: "ନିଶ୍ଚିତ ଭାବରେ! ଆମେ ୩ ଦିନିଆ ମାଗଣା ଟ୍ରାଏଲ୍ ପ୍ରଦାନ କରୁଛୁ ।" }
-  }
-];
-
-const App = () => {
-  const [lang, setLang] = useState('or');
-  const [isAnnual, setIsAnnual] = useState(false);
-  const [activeFaq, setActiveFaq] = useState(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  const t = (key) => translations[lang][key] || key;
-
-  const INSTRUCTORS = [
-    {
-      name: lang === 'en' ? "Ramesh Sankhua" : "ରମେଶ ସାଂଖୁଆ",
-      title: lang === 'en' ? "Secondary Education Expert" : "ମାଧ୍ୟମିକ ଶିକ୍ଷା ବିଶେଷଜ୍ଞ",
-      experience: lang === 'en' ? "30+ Years" : "୩୦+ ବର୍ଷ",
-      specialty: lang === 'en' ? "Grade 8 to Grade 10" : "ଅଷ୍ଟମ ରୁ ଦଶମ ଶ୍ରେଣୀ",
-      bio: lang === 'en' 
-        ? "Senior educator specializing in board preparation and advanced logical reasoning."
-        : "ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଏବଂ ଉନ୍ନତ ଯୁକ୍ତିଯୁକ୍ତ ଚିନ୍ତାଧାରାରେ ଜଣେ ବରିଷ୍ଠ ଶିକ୍ଷକ ।",
-      icon: <AwardIcon />
-    },
-    {
-      name: lang === 'en' ? "Sabitri Sankhua" : "ସାବିତ୍ରୀ ସାଂଖୁଆ",
-      title: lang === 'en' ? "Foundational Specialist" : "ପ୍ରାରମ୍ଭିକ ଶିକ୍ଷା ବିଶେଷଜ୍ଞ",
-      experience: lang === 'en' ? "20+ Years" : "୨୦+ ବର୍ଷ",
-      specialty: lang === 'en' ? "Nursery to Grade 3" : "ନର୍ସରୀ ରୁ ତୃତୀୟ ଶ୍ରେଣୀ",
-      bio: lang === 'en' 
-        ? "Focuses on early literacy, numeracy, and behavioral psychology for young learners."
-        : "ଛୋଟ ପିଲାଙ୍କ ମୌଳିକ ଶିକ୍ଷା, ଗଣିତ ଏବଂ ଆଚରଣଗତ ବିକାଶ ଉପରେ ଗୁରୁତ୍ୱ ଦିଅନ୍ତି ।",
-      icon: <ShieldCheckIcon />
-    },
-    {
-      name: lang === 'en' ? "Laxmipriya Sankhua" : "ଲକ୍ଷ୍ମୀପ୍ରିୟା ସାଂଖୁଆ",
-      title: lang === 'en' ? "Middle School Mentor" : "ମଧ୍ୟମ ଶିକ୍ଷା ମାର୍ଗଦର୍ଶକ",
-      experience: lang === 'en' ? "2+ Years" : "୨+ ବର୍ଷ",
-      specialty: lang === 'en' ? "Grade 4 to Grade 7" : "ଚତୁର୍ଥ ରୁ ସପ୍ତମ ଶ୍ରେଣୀ",
-      bio: lang === 'en' 
-        ? "Bridging the gap with interactive digital science and math tools."
-        : "ଡିଜିଟାଲ୍ ବିଜ୍ଞାନ ଏବଂ ଗଣିତ ଉପକରଣ ମାଧ୍ୟମରେ ପିଲାମାନଙ୍କୁ ଆଧୁନିକ ଶିକ୍ଷା ପ୍ରଦାନ କରନ୍ତି ।",
-      icon: <GraduationCapIcon />
-    }
-  ];
-
-  const PRICING_PLANS = [
-    {
-      name: lang === 'en' ? "Standard Daily" : "ସାଧାରଣ ଦୈନିକ",
-      monthly: 300,
-      annual: 240,
-      frequency: lang === 'en' ? "One session per day" : "ଦିନକୁ ଗୋଟିଏ ଶ୍ରେଣୀ",
-      features: [
-        lang === 'en' ? "Valid for Nursery to 10th" : "ନର୍ସରୀରୁ ଦଶମ ପାଇଁ ଉପଲବ୍ଧ",
-        lang === 'en' ? "2 Hour Daily Focus" : "ପ୍ରତିଦିନ ୨ ଘଣ୍ଟା ଶିକ୍ଷା",
-        lang === 'en' ? "Homework Support" : "ହୋମୱାର୍କ ସହାୟତା",
-        lang === 'en' ? "Monthly Progress" : "ମାସିକ ପ୍ରଗତି ସମୀକ୍ଷା"
-      ],
-      recommended: false
-    },
-    {
-      name: lang === 'en' ? "Premium Daily" : "ପ୍ରିମିୟମ ଦୈନିକ",
-      monthly: 600,
-      annual: 480,
-      frequency: lang === 'en' ? "Two sessions per day" : "ଦିନକୁ ଦୁଇଟି ଶ୍ରେଣୀ",
-      features: [
-        lang === 'en' ? "Valid for Nursery to 10th" : "ନର୍ସରୀରୁ ଦଶମ ପାଇଁ ଉପଲବ୍ଧ",
-        lang === 'en' ? "4 Hours Daily Access" : "ପ୍ରତିଦିନ ୪ ଘଣ୍ଟା ଶିକ୍ଷା",
-        lang === 'en' ? "Advanced Board Prep" : "ଉନ୍ନତ ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି",
-        lang === 'en' ? "Direct Mentorship" : "ଶିକ୍ଷକଙ୍କ ସହ ସିଧାସଳଖ ଆଳାପ"
-      ],
-      recommended: true
-    },
-    {
-      name: lang === 'en' ? "Custom / Weekend" : "ସ୍ୱତନ୍ତ୍ର / ସପ୍ତାହନ୍ତ",
-      monthly: lang === 'en' ? "Contact Us" : "ଯୋଗାଯୋଗ କରନ୍ତୁ",
-      annual: lang === 'en' ? "Contact Us" : "ଯୋଗାଯୋଗ କରନ୍ତୁ",
-      frequency: lang === 'en' ? "Flexible Timing" : "ସୁବିଧା ଅନୁସାରେ ସମୟ",
-      features: [
-        lang === 'en' ? "Weekend Exclusive" : "ସପ୍ତାହ ଶେଷ ଶ୍ରେଣୀ",
-        lang === 'en' ? "Exam Bootcamps" : "ପରୀକ୍ଷା ପୂର୍ବ ପ୍ରସ୍ତୁତି",
-        lang === 'en' ? "Special Modules" : "ସ୍ୱତନ୍ତ୍ର ଶିକ୍ଷା ମଡ୍ୟୁଲ୍"
-      ],
-      recommended: false
-    }
-  ];
-
-  const handleNavClick = (id) => {
-    setIsMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 80;
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  return (
-    <div className={`min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden ${lang === 'or' ? 'leading-relaxed' : ''}`}>
-      
-      {/* Booking Modal */}
-      <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${showModal ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-        <div className={`bg-white rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl transition-transform duration-300 ${showModal ? 'scale-100' : 'scale-95'}`}>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-black">{t('modalTitle')}</h2>
-            <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><XIcon /></button>
-          </div>
-          <p className="text-slate-500 mb-6 text-sm">{t('modalSubtitle')}</p>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1">{t('fullName')}</label>
-              <input type="text" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all text-sm" placeholder="John Doe" />
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-black" data-t="modalTitle">ମାଗଣା ଡେମୋ ବୁକ୍ କରନ୍ତୁ</h2>
+                <button onclick="toggleModal(false)" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 mb-1">{t('gradeLevel')}</label>
-              <select className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all text-sm">
-                <option>Nursery - UKG</option>
-                <option>Class 1 - 5</option>
-                <option>Class 6 - 8</option>
-                <option>Class 9 - 10</option>
-              </select>
-            </div>
-            <button className="w-full py-3.5 sm:py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
-              {t('submit')}
-            </button>
-          </div>
+            <p class="text-slate-500 mb-6 text-sm" data-t="modalSubtitle">ଆପଣଙ୍କ ସୁବିଧା ଅନୁସାରେ ସମୟ ବାଛନ୍ତୁ</p>
+            <form class="space-y-4" onsubmit="event.preventDefault(); alert('Request sent!'); toggleModal(false);">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-t="fullName">ପୂରା ନାମ</label>
+                    <input type="text" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all text-sm" placeholder="Your Name">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-t="gradeLevel">ଛାତ୍ରଙ୍କ ଶ୍ରେଣୀ</label>
+                    <select class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-600 outline-none transition-all text-sm">
+                        <option>Nursery - UKG</option>
+                        <option>Class 1 - 5</option>
+                        <option>Class 6 - 8</option>
+                        <option>Class 9 - 10</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3.5 sm:py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200" data-t="submit">ପଠାନ୍ତୁ</button>
+            </form>
         </div>
-      </div>
+    </div>
 
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shrink-0">
-                <GraduationCapIcon />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-lg sm:text-xl leading-tight text-slate-800">BrightMinds</span>
-                <span className="text-[9px] sm:text-[10px] text-indigo-600 font-medium tracking-tight whitespace-nowrap">{t('tagline')}</span>
-              </div>
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <div class="flex items-center gap-2 sm:gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="bg-indigo-600 p-1.5 sm:p-2 rounded-lg text-white shrink-0">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg sm:text-xl leading-tight text-slate-800">BrightMinds</span>
+                        <span id="tagline-header" class="text-[9px] sm:text-[10px] text-indigo-600 font-medium tracking-tight whitespace-nowrap" data-t="tagline">ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ ।</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- Language Toggle -->
+                    <div class="flex bg-slate-100 p-1 rounded-full border border-slate-200">
+                        <button onclick="setLanguage('en')" id="lang-btn-en" class="px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all text-slate-500 hover:text-indigo-600">EN</button>
+                        <button onclick="setLanguage('or')" id="lang-btn-or" class="px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all bg-indigo-600 text-white shadow-sm">ଓଡ଼ିଆ</button>
+                    </div>
+
+                    <!-- Desktop Nav -->
+                    <div class="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-600 uppercase tracking-wider">
+                        <a href="#grades" class="hover:text-indigo-600 transition-colors" data-t="navGrades">ଶ୍ରେଣୀ</a>
+                        <a href="#instructors" class="hover:text-indigo-600 transition-colors" data-t="navTeam">ଟିମ୍</a>
+                        <a href="#pricing" class="hover:text-indigo-600 transition-colors" data-t="navPricing">ମୂଲ୍ୟ</a>
+                        <a href="#faq" class="hover:text-indigo-600 transition-colors" data-t="navFaq">ପ୍ରଶ୍ନୋତ୍ତର</a>
+                        <button onclick="toggleModal(true)" class="bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-all shadow-md text-xs" data-t="bookDemo">ଡେମୋ ବୁକ୍ କରନ୍ତୁ</button>
+                    </div>
+
+                    <!-- Mobile Toggle -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-slate-600">
+                        <svg id="menu-icon" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                    </button>
+                </div>
             </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Language Toggle */}
-              <div className="flex bg-slate-100 p-1 rounded-full border border-slate-200">
-                <button 
-                  onClick={() => setLang('en')}
-                  className={`px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all ${lang === 'en' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500'}`}
-                >
-                  EN
-                </button>
-                <button 
-                  onClick={() => setLang('or')}
-                  className={`px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all ${lang === 'or' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500'}`}
-                >
-                  ଓଡ଼ିଆ
-                </button>
-              </div>
-
-              {/* Desktop Nav */}
-              <div className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-600 uppercase tracking-wider">
-                <button onClick={() => handleNavClick('grades')} className="hover:text-indigo-600 transition-colors">{t('navGrades')}</button>
-                <button onClick={() => handleNavClick('instructors')} className="hover:text-indigo-600 transition-colors">{t('navTeam')}</button>
-                <button onClick={() => handleNavClick('pricing')} className="hover:text-indigo-600 transition-colors">{t('navPricing')}</button>
-                <button onClick={() => handleNavClick('faq')} className="hover:text-indigo-600 transition-colors">{t('navFaq')}</button>
-                <button onClick={() => setShowModal(true)} className="bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-all shadow-md text-xs">
-                  {t('bookDemo')}
-                </button>
-              </div>
-
-              {/* Mobile Toggle */}
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden p-2 text-slate-600">
-                {isMenuOpen ? <XIcon /> : <MenuIcon />}
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Mobile Menu */}
-        <div className={`lg:hidden bg-white border-b border-slate-200 transition-all duration-300 overflow-hidden ${isMenuOpen ? 'max-h-[30rem] py-4' : 'max-h-0'}`}>
-          <div className="flex flex-col gap-1 px-6 text-sm font-bold text-slate-600 uppercase">
-            <button onClick={() => handleNavClick('grades')} className="text-left py-3.5 border-b border-slate-50 active:bg-slate-50 px-2">{t('navGrades')}</button>
-            <button onClick={() => handleNavClick('instructors')} className="text-left py-3.5 border-b border-slate-50 active:bg-slate-50 px-2">{t('navTeam')}</button>
-            <button onClick={() => handleNavClick('pricing')} className="text-left py-3.5 border-b border-slate-50 active:bg-slate-50 px-2">{t('navPricing')}</button>
-            <button onClick={() => handleNavClick('faq')} className="text-left py-3.5 border-b border-slate-50 active:bg-slate-50 px-2">{t('navFaq')}</button>
-            <button onClick={() => { setIsMenuOpen(false); setShowModal(true); }} className="text-left py-4 text-indigo-600 active:bg-indigo-50 px-2 rounded-lg mt-2">{t('bookDemo')}</button>
-          </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="lg:hidden bg-white border-b border-slate-200">
+            <div class="flex flex-col gap-1 px-6 text-sm font-bold text-slate-600 uppercase py-4">
+                <a href="#grades" onclick="toggleMobileMenu()" class="text-left py-3.5 border-b border-slate-50 px-2" data-t="navGrades">ଶ୍ରେଣୀ</a>
+                <a href="#instructors" onclick="toggleMobileMenu()" class="text-left py-3.5 border-b border-slate-50 px-2" data-t="navTeam">ଟିମ୍</a>
+                <a href="#pricing" onclick="toggleMobileMenu()" class="text-left py-3.5 border-b border-slate-50 px-2" data-t="navPricing">ମୂଲ୍ୟ</a>
+                <a href="#faq" onclick="toggleMobileMenu()" class="text-left py-3.5 border-b border-slate-50 px-2" data-t="navFaq">ପ୍ରଶ୍ନୋତ୍ତର</a>
+                <button onclick="toggleMobileMenu(); toggleModal(true)" class="text-left py-4 text-indigo-600 px-2 rounded-lg mt-2 font-black" data-t="bookDemo">ଡେମୋ ବୁକ୍ କରନ୍ତୁ</button>
+            </div>
         </div>
-      </nav>
+    </nav>
 
-      {/* Hero */}
-      <section className={`relative pt-12 sm:pt-16 pb-16 sm:pb-24 px-4 overflow-hidden transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-10">
-          <div className="absolute top-0 left-0 w-48 sm:w-64 h-48 sm:h-64 bg-indigo-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-blue-500 rounded-full blur-3xl animate-pulse"></div>
+    <!-- Hero -->
+    <section class="relative pt-12 sm:pt-16 pb-16 sm:pb-24 px-4 overflow-hidden fade-in">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-10">
+            <div class="absolute top-0 left-0 w-48 sm:w-64 h-48 sm:h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
+            <div class="absolute bottom-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-blue-500 rounded-full blur-3xl opacity-50"></div>
         </div>
         
-        <div className="max-w-5xl mx-auto text-center">
-          <span className="inline-block py-1 px-4 rounded-full bg-indigo-100 text-indigo-700 text-[10px] sm:text-xs font-bold mb-6 tracking-widest uppercase">
-            {t('badge')}
-          </span>
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-black text-slate-900 mb-4 leading-[1.2] sm:leading-[1.1] px-2 sm:px-0">
-            {t('heroTitle')}
-          </h1>
-          <p className="text-indigo-600 font-bold text-base sm:text-xl lg:text-2xl mb-8 tracking-wide italic opacity-90">
-            — {t('tagline')} —
-          </p>
-          <p className="text-sm sm:text-lg lg:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed px-4">
-            {t('heroSubtitle')}
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-6 sm:px-0">
-            <button 
-              onClick={() => setShowModal(true)}
-              className="px-8 py-3.5 sm:px-10 sm:py-4 bg-indigo-600 text-white rounded-xl font-bold text-base sm:text-lg hover:bg-indigo-700 transition-all shadow-xl flex items-center justify-center gap-2 hover:-translate-y-1 active:scale-95"
-            >
-              {t('startTrial')} <ChevronRightIcon />
-            </button>
-            <button 
-              onClick={() => handleNavClick('grades')}
-              className="px-8 py-3.5 sm:px-10 sm:py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold text-base sm:text-lg hover:bg-slate-50 transition-all shadow-sm hover:-translate-y-1 active:scale-95"
-            >
-              {t('exploreGrades')}
-            </button>
-          </div>
-          
-          <div className="mt-12 sm:mt-16 flex justify-center items-center gap-4 sm:gap-8 grayscale opacity-60 flex-wrap px-4">
-            <div className="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap"><TrophyIcon /> {t('successRate')}</div>
-            <div className="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap"><UsersIcon /> {t('studentsCount')}</div>
-            <div className="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap"><StarIcon filled={true} /> {t('subjects')}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Grades Grid */}
-      <section id="grades" className="py-16 sm:py-20 bg-white shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl font-black mb-8 sm:mb-12">{t('segmentsTitle')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {[
-              { level: t('nurseryUkg'), desc: t('nurseryDesc'), color: "bg-pink-50 border-pink-100" },
-              { level: t('class1_3'), desc: t('class1_3Desc'), color: "bg-blue-50 border-blue-100" },
-              { level: t('class4_7'), desc: t('class4_7Desc'), color: "bg-green-50 border-green-100" },
-              { level: t('class8_10'), desc: t('class8_10Desc'), color: "bg-indigo-50 border-indigo-100" }
-            ].map((item, i) => (
-              <div key={i} className={`${item.color} p-5 sm:p-6 rounded-2xl border text-left hover:shadow-lg transition-all cursor-default`}>
-                <h4 className="font-bold text-slate-900 mb-2">{item.level}</h4>
-                <p className="text-slate-600 text-xs sm:text-sm leading-tight">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Instructors */}
-      <section id="instructors" className="py-16 sm:py-24 bg-slate-50 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-indigo-600 font-bold tracking-[0.2em] uppercase text-[10px] sm:text-xs mb-4">{t('facultyTitle')}</h2>
-            <h3 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">{t('facultySubtitle')}</h3>
-            <p className="text-slate-600 max-w-xl mx-auto italic text-sm sm:text-base px-4">{t('facultyQuote')}</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {INSTRUCTORS.map((ins, idx) => (
-              <div key={idx} className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
-                <div className="mb-5 sm:mb-6 bg-indigo-100 w-12 sm:w-16 h-12 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-                  {ins.icon}
-                </div>
-                <div className="inline-block px-3 py-1 rounded-full bg-indigo-600 text-white text-[9px] sm:text-[10px] font-bold mb-4 uppercase tracking-wider">
-                  {ins.experience} {lang === 'en' ? 'Exp' : 'ଅଭିଜ୍ଞତା'}
-                </div>
-                <h4 className="text-xl sm:text-2xl font-bold text-slate-900 mb-1">{ins.name}</h4>
-                <p className="text-indigo-600 font-bold mb-4 text-xs sm:text-sm uppercase tracking-wide">{ins.title}</p>
-                <div className="h-px bg-slate-200 w-full mb-4"></div>
-                <p className="text-slate-600 leading-relaxed text-xs sm:text-sm mb-6 min-h-0 sm:min-h-[60px]">
-                  {ins.bio}
-                </p>
-                <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
-                  {lang === 'en' ? 'Specialist' : 'ବିଶେଷଜ୍ଞ'}: {ins.specialty}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-16 sm:py-24 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <h3 className="text-3xl sm:text-4xl font-black text-slate-900 mb-6">{t('pricingTitle')}</h3>
+        <div class="max-w-5xl mx-auto text-center">
+            <span class="inline-block py-1 px-4 rounded-full bg-indigo-100 text-indigo-700 text-[10px] sm:text-xs font-bold mb-6 tracking-widest uppercase" data-t="badge">ନର୍ସରୀ ରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ</span>
+            <h1 class="text-3xl sm:text-5xl lg:text-7xl font-black text-slate-900 mb-4 leading-[1.2] sm:leading-[1.1] px-2 sm:px-0" data-t="heroTitle">ପ୍ରତିଦିନ ଶ୍ରେଷ୍ଠତା ହାସଲ କରନ୍ତୁ ।</h1>
+            <p class="text-indigo-600 font-bold text-base sm:text-xl lg:text-2xl mb-8 tracking-wide italic opacity-90" data-t="heroTagline">— ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ । —</p>
+            <p class="text-sm sm:text-lg lg:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed px-4" data-t="heroSubtitle">ନର୍ସରୀରୁ ଆରମ୍ଭ କରି ଦଶମ ଶ୍ରେଣୀ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ। ଆମର ବଂଶଗତ ଅଭିଜ୍ଞତା ଆପଣଙ୍କ ପିଲାଙ୍କୁ ପ୍ରତିଟି ସୋପାନରେ ସଫଳତା ପ୍ରଦାନ କରେ ।</p>
             
-            <div className="flex items-center justify-center gap-3 sm:gap-4">
-              <span className={`text-xs sm:text-sm font-bold ${!isAnnual ? 'text-slate-900' : 'text-slate-400'}`}>{t('monthly')}</span>
-              <button 
-                onClick={() => setIsAnnual(!isAnnual)}
-                className="w-12 sm:w-14 h-6 sm:h-8 bg-slate-200 rounded-full p-1 transition-all relative"
-              >
-                <div className={`w-4 sm:w-6 h-4 sm:h-6 bg-indigo-600 rounded-full transition-all ${isAnnual ? 'translate-x-6' : 'translate-x-0'}`}></div>
-              </button>
-              <span className={`text-xs sm:text-sm font-bold ${isAnnual ? 'text-slate-900' : 'text-slate-400'}`}>
-                {t('yearly')} <span className="bg-green-100 text-green-700 text-[9px] sm:text-[10px] px-2 py-0.5 rounded ml-1 font-black">{t('save')}</span>
-              </span>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-6 sm:px-0">
+                <button onclick="toggleModal(true)" class="px-8 py-3.5 sm:px-10 sm:py-4 bg-indigo-600 text-white rounded-xl font-bold text-base sm:text-lg hover:bg-indigo-700 transition-all shadow-xl flex items-center justify-center gap-2 hover:-translate-y-1" data-t="startTrial">ଟ୍ରାଏଲ୍ ଆରମ୍ଭ କରନ୍ତୁ</button>
+                <a href="#grades" class="px-8 py-3.5 sm:px-10 sm:py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold text-base sm:text-lg hover:bg-slate-50 transition-all shadow-sm hover:-translate-y-1 flex items-center justify-center" data-t="exploreGrades">ଶ୍ରେଣୀ ଦେଖନ୍ତୁ</a>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {PRICING_PLANS.map((plan, idx) => (
-              <div 
-                key={idx} 
-                className={`bg-white rounded-[1.5rem] sm:rounded-[2rem] p-8 sm:p-10 border flex flex-col ${plan.recommended ? 'border-indigo-600 ring-0 sm:ring-4 sm:ring-indigo-50 shadow-2xl lg:scale-105 relative z-10' : 'border-slate-200 shadow-lg'} transition-all`}
-              >
-                {plan.recommended && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                    {t('bestForResults')}
-                  </div>
-                )}
-                <h3 className="text-lg sm:text-xl font-bold mb-1">{plan.name}</h3>
-                <p className="text-indigo-600 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] mb-4">{plan.frequency}</p>
-                <div className="mb-6 sm:mb-8">
-                  <span className="text-4xl sm:text-5xl font-black text-slate-900">
-                    {typeof plan.monthly === 'number' ? `₹${isAnnual ? plan.annual : plan.monthly}` : plan.monthly}
-                  </span>
-                  {typeof plan.monthly === 'number' && <span className="text-slate-400 font-bold text-xs sm:text-sm ml-1">{t('perMonth')}</span>}
+            
+            <div class="mt-12 sm:mt-16 flex justify-center items-center gap-4 sm:gap-8 grayscale opacity-60 flex-wrap px-4">
+                <div class="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    <span data-t="successRate">୯୮% ସଫଳତା ହାର</span>
                 </div>
-                
-                <ul className="space-y-3 sm:space-y-4 mb-8 sm:mb-10 grow">
-                  {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-slate-600 font-medium">
-                      <div className="text-indigo-500 mt-0.5 shrink-0"><CheckCircleIcon /></div>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <button 
-                  onClick={() => setShowModal(true)}
-                  className={`w-full py-3.5 sm:py-4 rounded-xl font-bold transition-all uppercase tracking-widest text-[10px] ${plan.recommended ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 active:scale-95' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 active:scale-95'}`}
-                >
-                  {t('joinNow')}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Accordion */}
-      <section id="faq" className="py-16 sm:py-24 bg-slate-50">
-        <div className="max-w-3xl mx-auto px-4">
-          <h3 className="text-3xl sm:text-4xl font-black text-center mb-10 sm:mb-16">{t('faqTitle')}</h3>
-          <div className="space-y-3 sm:space-y-4">
-            {FAQS.map((faq, idx) => (
-              <div key={idx} className="bg-white rounded-xl sm:rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300">
-                <button 
-                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                  className="w-full flex items-center justify-between p-5 sm:p-6 text-left focus:bg-slate-50 outline-none"
-                >
-                  <span className="font-bold text-slate-800 text-sm sm:text-base pr-4">{faq.q[lang]}</span>
-                  <div className={`transition-transform duration-300 shrink-0 ${activeFaq === idx ? 'rotate-180' : ''}`}>
-                    <ChevronDownIcon />
-                  </div>
-                </button>
-                <div className={`transition-all duration-300 overflow-hidden ${activeFaq === idx ? 'max-h-60 sm:max-h-40 border-t border-slate-50 p-5 sm:p-6 bg-slate-50/50' : 'max-h-0'}`}>
-                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{faq.a[lang]}</p>
+                <div class="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span data-t="studentsCount">୧୦ ହଜାର+ ଛାତ୍ରଛାତ୍ରୀ</span>
                 </div>
-              </div>
-            ))}
-          </div>
+                <div class="flex items-center gap-2 font-bold text-xs sm:text-sm whitespace-nowrap">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span data-t="subjects">ସମସ୍ତ ବିଷୟ ଅନ୍ତର୍ଭୁକ୍ତ</span>
+                </div>
+            </div>
         </div>
-      </section>
+    </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 sm:py-16 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 text-center sm:text-left">
-          <div className="flex flex-col items-center sm:items-start">
-            <div className="flex items-center gap-2 mb-2 text-white">
-              <div className="bg-indigo-600 p-1.5 rounded-lg"><GraduationCapIcon /></div>
-              <span className="font-bold text-xl sm:text-2xl leading-tight">BrightMinds</span>
+    <!-- Grades Grid -->
+    <section id="grades" class="py-16 sm:py-20 bg-white shadow-inner">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-2xl sm:text-3xl font-black mb-8 sm:mb-12" data-t="segmentsTitle">ଆମେ ପ୍ରଦାନ କରୁଥିବା ଶିକ୍ଷା ସ୍ତର</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-pink-50 border-pink-100 p-5 sm:p-6 rounded-2xl border text-left hover:shadow-lg transition-all cursor-default">
+                    <h4 class="font-bold text-slate-900 mb-2" data-t="nurseryUkg">ନର୍ସରୀ - UKG</h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-tight" data-t="nurseryDesc">ମୂଳଦୁଆ ଶିକ୍ଷା ଓ ଖେଳ ମାଧ୍ୟମରେ ପାଠପଢା</p>
+                </div>
+                <div class="bg-blue-50 border-blue-100 p-5 sm:p-6 rounded-2xl border text-left hover:shadow-lg transition-all cursor-default">
+                    <h4 class="font-bold text-slate-900 mb-2" data-t="class1_3">ପ୍ରଥମ - ତୃତୀୟ ଶ୍ରେଣୀ</h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-tight" data-t="class1_3Desc">ସାଧାରଣ ଗଣିତ, ପଢିବା ଓ ସୃଜନଶୀଳ ଚିନ୍ତାଧାରା</p>
+                </div>
+                <div class="bg-green-50 border-green-100 p-5 sm:p-6 rounded-2xl border text-left hover:shadow-lg transition-all cursor-default">
+                    <h4 class="font-bold text-slate-900 mb-2" data-t="class4_7">ଚତୁର୍ଥ - ସପ୍ତମ ଶ୍ରେଣୀ</h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-tight" data-t="class4_7Desc">ବିଜ୍ଞାନ ଓ ଯୁକ୍ତିଯୁକ୍ତ ଚିନ୍ତାଧାରାର ବିକାଶ</p>
+                </div>
+                <div class="bg-indigo-50 border-indigo-100 p-5 sm:p-6 rounded-2xl border text-left hover:shadow-lg transition-all cursor-default">
+                    <h4 class="font-bold text-slate-900 mb-2" data-t="class8_10">ଅଷ୍ଟମ - ଦଶମ ଶ୍ରେଣୀ</h4>
+                    <p class="text-slate-600 text-xs sm:text-sm leading-tight" data-t="class8_10Desc">ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଓ ଉନ୍ନତ ଶିକ୍ଷା</p>
+                </div>
             </div>
-            <p className="text-indigo-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-6 ml-0 sm:ml-1 text-center sm:text-left">{t('tagline')}</p>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs px-4 sm:px-0">
-              {t('footerText')}
-            </p>
-          </div>
-          
-          <div className="space-y-4 hidden sm:block">
-            <h4 className="font-bold uppercase tracking-widest text-xs text-indigo-400">{t('classBlocks')}</h4>
-            <div className="text-slate-400 text-xs sm:text-sm space-y-2">
-              <p>{t('nurseryUkg')}</p>
-              <p>{t('class1_3')}</p>
-              <p>{t('class4_7')}</p>
-              <p>{t('class8_10')}</p>
-            </div>
-          </div>
-
-          <div className="space-y-5 flex flex-col items-center sm:items-start">
-            <h4 className="font-bold uppercase tracking-widest text-xs text-indigo-400">{t('newsletter')}</h4>
-            <div className="flex bg-slate-800 rounded-xl p-1 w-full max-w-sm">
-              <input type="email" placeholder={t('parentEmail')} className="bg-transparent border-none px-4 py-2 w-full text-xs sm:text-sm focus:ring-0 outline-none placeholder:text-slate-500" />
-              <button className="bg-indigo-600 px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-indigo-700 transition-colors shrink-0">{t('join')}</button>
-            </div>
-            <div className="flex gap-4 opacity-50 pt-2">
-              {/* Social icons placeholder */}
-              <div className="w-8 h-8 rounded-full bg-slate-700"></div>
-              <div className="w-8 h-8 rounded-full bg-slate-700"></div>
-              <div className="w-8 h-8 rounded-full bg-slate-700"></div>
-            </div>
-          </div>
         </div>
-        <div className="max-w-7xl mx-auto border-t border-slate-800 mt-12 pt-8 text-center text-slate-500 text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-4">
-          &copy; 2024 BrightMinds Academy by Sankhua Faculty.
-        </div>
-      </footer>
-    </div>
-  );
-};
+    </section>
 
-export default App;
+    <!-- Instructors -->
+    <section id="instructors" class="py-16 sm:py-24 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-10 sm:mb-16">
+                <h2 class="text-indigo-600 font-bold tracking-[0.2em] uppercase text-[10px] sm:text-xs mb-4" data-t="facultyTitle">ସାଂଖୁଆ ଶିକ୍ଷକ ମଣ୍ଡଳୀ</h2>
+                <h3 class="text-3xl sm:text-4xl font-black text-slate-900 mb-4" data-t="facultySubtitle">ବଂଶଗତ ଜ୍ଞାନ ଓ ଅଭିଜ୍ଞତା</h3>
+                <p class="text-slate-600 max-w-xl mx-auto italic text-sm sm:text-base px-4" data-t="facultyQuote">"ଆମେ ପିଲାମାନଙ୍କୁ ସ୍କୁଲର ପ୍ରଥମ ଦିନରୁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ୋ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ ଗଢିଥାଉ ।"</p>
+            </div>
+
+            <div id="instructors-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                <!-- Will be rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-16 sm:py-24 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-10 sm:mb-16">
+                <h3 class="text-3xl sm:text-4xl font-black text-slate-900 mb-6" data-t="pricingTitle">ସମସ୍ତ ଶ୍ରେଣୀ ପାଇଁ ସରଳ ମୂଲ୍ୟ</h3>
+                
+                <div class="flex items-center justify-center gap-3 sm:gap-4">
+                    <span class="text-xs sm:text-sm font-bold text-slate-400" data-t="monthly">ମାସିକ</span>
+                    <button onclick="togglePricing()" id="pricing-toggle" class="w-12 sm:w-14 h-6 sm:h-8 bg-slate-200 rounded-full p-1 transition-all relative">
+                        <div id="toggle-circle" class="w-4 sm:w-6 h-4 sm:h-6 bg-indigo-600 rounded-full transition-all translate-x-0"></div>
+                    </button>
+                    <span class="text-xs sm:text-sm font-bold text-slate-900">
+                        <span data-t="yearly">ବାର୍ଷିକ</span> <span class="bg-green-100 text-green-700 text-[9px] sm:text-[10px] px-2 py-0.5 rounded ml-1 font-black" data-t="save">୨୦% ରିହାତି</span>
+                    </span>
+                </div>
+            </div>
+
+            <div id="pricing-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+                <!-- Will be rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-16 sm:py-24 bg-slate-50">
+        <div class="max-w-3xl mx-auto px-4">
+            <h3 class="text-3xl sm:text-4xl font-black text-center mb-10 sm:mb-16" data-t="faqTitle">ସାଧାରଣ ପ୍ରଶ୍ନୋତ୍ତର</h3>
+            <div id="faq-container" class="space-y-3 sm:space-y-4">
+                <!-- Will be rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12 sm:py-16 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 text-center sm:text-left">
+            <div class="flex flex-col items-center sm:items-start">
+                <div class="flex items-center gap-2 mb-2 text-white">
+                    <div class="bg-indigo-600 p-1.5 rounded-lg">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <span class="font-bold text-xl sm:text-2xl leading-tight">BrightMinds</span>
+                </div>
+                <p class="text-indigo-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-6" data-t="tagline">ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ ।</p>
+                <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xs px-4 sm:px-0" data-t="footerText">
+                    ଶିକ୍ଷା କ୍ଷେତ୍ରରେ ସାଂଖୁଆ ପରିବାରର ପରମ୍ପରା। ୧୯୯୪ ରୁ ନର୍ସରୀରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ ପିଲାମାନଙ୍କୁ ମାର୍ଗଦର୍ଶନ।
+                </p>
+            </div>
+            
+            <div class="space-y-4 hidden sm:block">
+                <h4 class="font-bold uppercase tracking-widest text-xs text-indigo-400" data-t="classBlocks">ଶିକ୍ଷା ସ୍ତର</h4>
+                <div class="text-slate-400 text-xs sm:text-sm space-y-2">
+                    <p data-t="nurseryUkg">ନର୍ସରୀ - UKG</p>
+                    <p data-t="class1_3">ପ୍ରଥମ - ତୃତୀୟ ଶ୍ରେଣୀ</p>
+                    <p data-t="class4_7">ଚତୁର୍ଥ - ସପ୍ତମ ଶ୍ରେଣୀ</p>
+                    <p data-t="class8_10">ଅଷ୍ଟମ - ଦଶମ ଶ୍ରେଣୀ</p>
+                </div>
+            </div>
+
+            <div class="space-y-5 flex flex-col items-center sm:items-start">
+                <h4 class="font-bold uppercase tracking-widest text-xs text-indigo-400" data-t="newsletter">ଆମ ସହ ଯୋଡି ହୁଅନ୍ତୁ</h4>
+                <div class="flex bg-slate-800 rounded-xl p-1 w-full max-w-sm">
+                    <input type="email" placeholder="Email" class="bg-transparent border-none px-4 py-2 w-full text-xs sm:text-sm focus:ring-0 outline-none placeholder:text-slate-500">
+                    <button class="bg-indigo-600 px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-indigo-700 transition-colors shrink-0" data-t="join">ଯୋଡି ହୁଅନ୍ତୁ</button>
+                </div>
+                <div class="flex gap-4 opacity-50 pt-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                    <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                    <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto border-t border-slate-800 mt-12 pt-8 text-center text-slate-500 text-[9px] sm:text-[10px] uppercase tracking-widest font-bold px-4">
+            &copy; 2024 BrightMinds Academy by Sankhua Faculty.
+        </div>
+    </footer>
+
+    <script>
+        // --- Translations ---
+        const translations = {
+            en: {
+                tagline: "Empowering Minds, Shaping Futures",
+                navGrades: "Grades",
+                navTeam: "Team",
+                navPricing: "Pricing",
+                navFaq: "FAQ",
+                bookDemo: "Book Demo",
+                badge: "Nursery to 10th Class Support",
+                heroTitle: "Unlock Excellence Every Single Day.",
+                heroTagline: "— Empowering Minds, Shaping Futures —",
+                heroSubtitle: "From first steps in Nursery to board exam excellence in 10th Class. Our generational expertise ensures your child succeeds at every milestone.",
+                startTrial: "Start Trial",
+                exploreGrades: "Explore Grades",
+                successRate: "98% Success Rate",
+                studentsCount: "10k+ Students",
+                subjects: "All Subjects Covered",
+                segmentsTitle: "Academic Segments We Cover",
+                nurseryUkg: "Nursery - UKG",
+                nurseryDesc: "Foundational Literacy & Play-way Learning",
+                class1_3: "Class 1 - 3",
+                class1_3Desc: "Basic Math, Reading & Creative Thinking",
+                class4_7: "Class 4 - 7",
+                class4_7Desc: "Conceptual Science & Logic Building",
+                class8_10: "Class 8 - 10",
+                class8_10Desc: "Board Prep & Advanced Competency",
+                facultyTitle: "The Sankhua Faculty",
+                facultySubtitle: "Generational Wisdom",
+                facultyQuote: '"We nurture learners from their very first day of school to their crucial board exams."',
+                pricingTitle: "Simple Pricing For All Classes",
+                monthly: "Monthly",
+                yearly: "Yearly",
+                save: "SAVE 20%",
+                perMonth: "/mo",
+                joinNow: "Join Program",
+                bestForResults: "Best for Results",
+                faqTitle: "Frequently Asked Questions",
+                footerText: "The Sankhua family legacy in education. Mentoring students from Nursery to Grade 10 since 1994.",
+                classBlocks: "Class Blocks",
+                newsletter: "Join our Newsletter",
+                parentEmail: "Parent's Email",
+                join: "Join",
+                modalTitle: "Book Your Free Demo",
+                modalSubtitle: "Choose a time that works for you",
+                fullName: "Full Name",
+                gradeLevel: "Student's Grade",
+                submit: "Send Request",
+                specialist: "Specialist",
+                experience: "Experience"
+            },
+            or: {
+                tagline: "ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ ।",
+                navGrades: "ଶ୍ରେଣୀ",
+                navTeam: "ଟିମ୍",
+                navPricing: "ମୂଲ୍ୟ",
+                navFaq: "ପ୍ରଶ୍ନୋତ୍ତର",
+                bookDemo: "ଡେମୋ ବୁକ୍ କରନ୍ତୁ",
+                badge: "ନର୍ସରୀ ରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ",
+                heroTitle: "ପ୍ରତିଦିନ ଶ୍ରେଷ୍ଠତା ହାସଲ କରନ୍ତୁ ।",
+                heroTagline: "— ଜ୍ଞାନରୁ ସଶକ୍ତିକରଣ, ସଫଳ ଭବିଷ୍ୟତର ନିର୍ମାଣ । —",
+                heroSubtitle: "ନର୍ସରୀରୁ ଆରମ୍ଭ କରି ଦଶମ ଶ୍ରେଣୀ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ। ଆମର ବଂଶଗତ ଅଭିଜ୍ଞତା ଆପଣଙ୍କ ପିଲାଙ୍କୁ ପ୍ରତିଟି ସୋପାନରେ ସଫଳତା ପ୍ରଦାନ କରେ ।",
+                startTrial: "ଟ୍ରାଏଲ୍ ଆରମ୍ଭ କରନ୍ତୁ",
+                exploreGrades: "ଶ୍ରେଣୀ ଦେଖନ୍ତୁ",
+                successRate: "୯୮% ସଫଳତା ହାର",
+                studentsCount: "୧୦ ହଜାର+ ଛାତ୍ରଛାତ୍ରୀ",
+                subjects: "ସମସ୍ତ ବିଷୟ ଅନ୍ତର୍ଭୁକ୍ତ",
+                segmentsTitle: "ଆମେ ପ୍ରଦାନ କରୁଥିବା ଶିକ୍ଷା ସ୍ତର",
+                nurseryUkg: "ନର୍ସରୀ - UKG",
+                nurseryDesc: "ମୂଳଦୁଆ ଶିକ୍ଷା ଓ ଖେଳ ମାଧ୍ୟମରେ ପାଠପଢା",
+                class1_3: "ପ୍ରଥମ - ତୃତୀୟ ଶ୍ରେଣୀ",
+                class1_3Desc: "ସାଧାରଣ ଗଣିତ, ପଢିବା ଓ ସୃଜନଶୀଳ ଚିନ୍ତାଧାରା",
+                class4_7: "ଚତୁର୍ଥ - ସପ୍ତମ ଶ୍ରେଣୀ",
+                class4_7Desc: "ବିଜ୍ଞାନ ଓ ଯୁକ୍ତିଯୁକ୍ତ ଚିନ୍ତାଧାରାର ବିକାଶ",
+                class8_10: "ଅଷ୍ଟମ - ଦଶମ ଶ୍ରେଣୀ",
+                class8_10Desc: "ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଓ ଉନ୍ନତ ଶିକ୍ଷା",
+                facultyTitle: "ସାଂଖୁଆ ଶିକ୍ଷକ ମଣ୍ଡଳୀ",
+                facultySubtitle: "ବଂଶଗତ ଜ୍ଞାନ ଓ ଅଭିଜ୍ଞତା",
+                facultyQuote: '"ଆମେ ପିଲାମାନଙ୍କୁ ସ୍କୁଲର ପ୍ରଥମ ଦିନରୁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ୋ ବୋର୍ଡ ପରୀକ୍ଷା ପର୍ଯ୍ୟନ୍ତ ଗଢିଥାଉ ।"',
+                pricingTitle: "ସମସ୍ତ ଶ୍ରେଣୀ ପାଇଁ ସରଳ ମୂଲ୍ୟ",
+                monthly: "ମାସିକ",
+                yearly: "ବାର୍ଷିକ",
+                save: "୨୦% ରିହାତି",
+                perMonth: "/ମାସ",
+                joinNow: "ଏବେ ଯୋଗ ଦିଅନ୍ତୁ",
+                bestForResults: "ସର୍ବୋତ୍ତମ ଫଳାଫଳ ପାଇଁ",
+                faqTitle: "ସାଧାରଣ ପ୍ରଶ୍ନୋତ୍ତର",
+                footerText: "ଶିକ୍ଷା କ୍ଷେତ୍ରରେ ସାଂଖୁଆ ପରିବାରର ପରମ୍ପରା। ୧୯୯୪ ରୁ ନର୍ସରୀରୁ ଦଶମ ଶ୍ରେଣୀ ପର୍ଯ୍ୟନ୍ତ ପିଲାମାନଙ୍କୁ ମାର୍ଗଦର୍ଶନ।",
+                classBlocks: "ଶିକ୍ଷା ସ୍ତର",
+                newsletter: "ଆମ ସହ ଯୋଡି ହୁଅନ୍ତୁ",
+                parentEmail: "ପିତାମାତାଙ୍କ ଇମେଲ୍",
+                join: "ଯୋଡି ହୁଅନ୍ତୁ",
+                modalTitle: "ମାଗଣା ଡେମୋ ବୁକ୍ କରନ୍ତୁ",
+                modalSubtitle: "ଆପଣଙ୍କ ସୁବିଧା ଅନୁସାରେ ସମୟ ବାଛନ୍ତୁ",
+                fullName: "ପୂରା ନାମ",
+                gradeLevel: "ଛାତ୍ରଙ୍କ ଶ୍ରେଣୀ",
+                submit: "ପଠାନ୍ତୁ",
+                specialist: "ବିଶେଷଜ୍ଞ",
+                experience: "ଅଭିଜ୍ଞତା"
+            }
+        };
+
+        // --- Data ---
+        const INSTRUCTORS_DATA = [
+            {
+                name: { en: "Ramesh Sankhua", or: "ରମେଶ ସାଂଖୁଆ" },
+                title: { en: "Secondary Education Expert", or: "ମାଧ୍ୟମିକ ଶିକ୍ଷା ବିଶେଷଜ୍ଞ" },
+                exp: { en: "30+ Years", or: "୩୦+ ବର୍ଷ" },
+                spec: { en: "Grade 8 to Grade 10", or: "ଅଷ୍ଟମ ରୁ ଦଶମ ଶ୍ରେଣୀ" },
+                bio: { en: "Senior educator specializing in board preparation and advanced logic.", or: "ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି ଏବଂ ଉନ୍ନତ ଯୁକ୍ତିଯୁକ୍ତ ଚିନ୍ତାଧାରାରେ ଜଣେ ବରିଷ୍ଠ ଶିକ୍ଷକ ।" },
+                iconId: "icon-award"
+            },
+            {
+                name: { en: "Sabitri Sankhua", or: "ସାବିତ୍ରୀ ସାଂଖୁଆ" },
+                title: { en: "Foundational Specialist", or: "ପ୍ରାରମ୍ଭିକ ଶିକ୍ଷା ବିଶେଷଜ୍ଞ" },
+                exp: { en: "20+ Years", or: "୨୦+ ବର୍ଷ" },
+                spec: { en: "Nursery to Grade 3", or: "ନର୍ସରୀ ରୁ ତୃତୀୟ ଶ୍ରେଣୀ" },
+                bio: { en: "Focuses on early literacy, numeracy, and behavioral psychology.", or: "ଛୋଟ ପିଲାଙ୍କ ମୌଳିକ ଶିକ୍ଷା, ଗଣିତ ଏବଂ ଆଚରଣଗତ ବିକାଶ ଉପରେ ଗୁରୁତ୍ୱ ଦିଅନ୍ତି ।" },
+                iconId: "icon-shield"
+            },
+            {
+                name: { en: "Laxmipriya Sankhua", or: "ଲକ୍ଷ୍ମୀପ୍ରିୟା ସାଂଖୁଆ" },
+                title: { en: "Middle School Mentor", or: "ମଧ୍ୟମ ଶିକ୍ଷା ମାର୍ଗଦର୍ଶକ" },
+                exp: { en: "2+ Years", or: "୨+ ବର୍ଷ" },
+                spec: { en: "Grade 4 to Grade 7", or: "ଚତୁର୍ଥ ରୁ ସପ୍ତମ ଶ୍ରେଣୀ" },
+                bio: { en: "Bridging the gap with interactive digital science and math tools.", or: "ଡିଜିଟାଲ୍ ବିଜ୍ଞାନ ଏବଂ ଗଣିତ ଉପକରଣ ମାଧ୍ୟମରେ ପିଲାମାନଙ୍କୁ ଆଧୁନିକ ଶିକ୍ଷା ପ୍ରଦାନ କରନ୍ତି ।" },
+                iconId: "icon-cap"
+            }
+        ];
+
+        const PRICING_DATA = [
+            {
+                name: { en: "Standard Daily", or: "ସାଧାରଣ ଦୈନିକ" },
+                monthly: 300,
+                annual: 240,
+                freq: { en: "One session per day", or: "ଦିନକୁ ଗୋଟିଏ ଶ୍ରେଣୀ" },
+                features: [
+                    { en: "Valid for Nursery to 10th", or: "ନର୍ସରୀରୁ ଦଶମ ପାଇଁ ଉପଲବ୍ଧ" },
+                    { en: "2 Hour Daily Focus", or: "ପ୍ରତିଦିନ ୨ ଘଣ୍ଟା ଶିକ୍ଷା" },
+                    { en: "Homework Support", or: "ହୋମୱାର୍କ ସହାୟତା" },
+                    { en: "Monthly Progress", or: "ମାସିକ ପ୍ରଗତି ସମୀକ୍ଷା" }
+                ],
+                recommended: false
+            },
+            {
+                name: { en: "Premium Daily", or: "ପ୍ରିମିୟମ ଦୈନିକ" },
+                monthly: 600,
+                annual: 480,
+                freq: { en: "Two sessions per day", or: "ଦିନକୁ ଦୁଇଟି ଶ୍ରେଣୀ" },
+                features: [
+                    { en: "Valid for Nursery to 10th", or: "ନର୍ସରୀରୁ ଦଶମ ପାଇଁ ଉପଲବ୍ଧ" },
+                    { en: "4 Hours Daily Access", or: "ପ୍ରତିଦିନ ୪ ଘଣ୍ଟା ଶିକ୍ଷା" },
+                    { en: "Advanced Board Prep", or: "ଉନ୍ନତ ବୋର୍ଡ ପରୀକ୍ଷା ପ୍ରସ୍ତୁତି" },
+                    { en: "Direct Mentorship", or: "ଶିକ୍ଷକଙ୍କ ସହ ସିଧାସଳଖ ଆଳାପ" }
+                ],
+                recommended: true
+            },
+            {
+                name: { en: "Custom / Weekend", or: "ସ୍ୱତନ୍ତ୍ର / ସପ୍ତାହନ୍ତ" },
+                monthly: "Contact",
+                annual: "Contact",
+                freq: { en: "Flexible Timing", or: "ସୁବିଧା ଅନୁସାରେ ସମୟ" },
+                features: [
+                    { en: "Weekend Exclusive", or: "ସପ୍ତାହ ଶେଷ ଶ୍ରେଣୀ" },
+                    { en: "Exam Bootcamps", or: "ପରୀକ୍ଷା ପୂର୍ବ ପ୍ରସ୍ତୁତି" },
+                    { en: "Special Modules", or: "ସ୍ୱତନ୍ତ୍ର ଶିକ୍ଷା ମଡ୍ୟୁଲ୍" }
+                ],
+                recommended: false
+            }
+        ];
+
+        const FAQS_DATA = [
+            {
+                q: { en: "Do you provide one-on-one sessions?", or: "ଆପଣ ବ୍ୟକ୍ତିଗତ ଶ୍ରେଣୀ ପ୍ରଦାନ କରନ୍ତି କି?" },
+                a: { en: "Yes, our Premium plan includes dedicated one-on-one mentorship for personalized growth.", or: "ହଁ, ଆମର ପ୍ରିମିୟମ ପ୍ଲାନରେ ବ୍ୟକ୍ତିଗତ ବିକାଶ ପାଇଁ ସ୍ୱତନ୍ତ୍ର ଶିକ୍ଷାଦାନ ଅନ୍ତର୍ଭୁକ୍ତ ।" }
+            },
+            {
+                q: { en: "What subjects are covered for Class 10?", or: "ଦଶମ ଶ୍ରେଣୀ ପାଇଁ କେଉଁ ବିଷୟଗୁଡିକ ପଢାଯାଏ?" },
+                a: { en: "We cover Mathematics, Science, English, and Social Studies tailored to board requirements.", or: "ଆମେ ଗଣିତ, ବିଜ୍ଞାନ, ଇଂରାଜୀ ଏବଂ ସାମାଧିକ ବିଜ୍ଞାନ ବୋର୍ଡ ପରୀକ୍ଷା ପାଇଁ ପଢାଇଥାଉ ।" }
+            },
+            {
+                q: { en: "Is there a trial period?", or: "କିଛି ଟ୍ରାଏଲ୍ ଅବଧି ଅଛି କି?" },
+                a: { en: "Absolutely! We offer a 3-day free trial so you can experience our teaching style.", or: "ନିଶ୍ଚିତ ଭାବରେ! ଆମେ ୩ ଦିନିଆ ମାଗଣା ଟ୍ରାଏଲ୍ ପ୍ରଦାନ କରୁଛୁ ।" }
+            }
+        ];
+
+        // --- State Management ---
+        let currentLang = 'or';
+        let isAnnual = false;
+
+        // --- Functions ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.body.classList.toggle('language-or', lang === 'or');
+            
+            // Update Toggle buttons
+            const enBtn = document.getElementById('lang-btn-en');
+            const orBtn = document.getElementById('lang-btn-or');
+            
+            if (lang === 'en') {
+                enBtn.className = "px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all bg-indigo-600 text-white shadow-sm";
+                orBtn.className = "px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all text-slate-500 hover:text-indigo-600";
+            } else {
+                enBtn.className = "px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all text-slate-500 hover:text-indigo-600";
+                orBtn.className = "px-2.5 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase rounded-full transition-all bg-indigo-600 text-white shadow-sm";
+            }
+
+            // Update all elements with data-t
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                el.innerText = translations[lang][key] || key;
+            });
+
+            renderInstructors();
+            renderPricing();
+            renderFaqs();
+        }
+
+        function togglePricing() {
+            isAnnual = !isAnnual;
+            const circle = document.getElementById('toggle-circle');
+            circle.style.transform = isAnnual ? 'translateX(24px)' : 'translateX(0)';
+            renderPricing();
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('booking-modal');
+            const inner = modal.children[0];
+            if (show) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                inner.classList.remove('scale-95');
+                inner.classList.add('scale-100');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                inner.classList.remove('scale-100');
+                inner.classList.add('scale-95');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('active');
+        }
+
+        function toggleFaq(index) {
+            const items = document.querySelectorAll('.faq-item');
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.toggle('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // --- Render Helpers ---
+        function renderInstructors() {
+            const container = document.getElementById('instructors-grid');
+            container.innerHTML = INSTRUCTORS_DATA.map(ins => `
+                <div class="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
+                    <div class="mb-5 sm:mb-6 bg-indigo-100 w-12 sm:w-16 h-12 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                        ${document.getElementById(ins.iconId).outerHTML}
+                    </div>
+                    <div class="inline-block px-3 py-1 rounded-full bg-indigo-600 text-white text-[9px] sm:text-[10px] font-bold mb-4 uppercase tracking-wider">
+                        ${ins.exp[currentLang]} ${translations[currentLang].experience}
+                    </div>
+                    <h4 class="text-xl sm:text-2xl font-bold text-slate-900 mb-1">${ins.name[currentLang]}</h4>
+                    <p class="text-indigo-600 font-bold mb-4 text-xs sm:text-sm uppercase tracking-wide">${ins.title[currentLang]}</p>
+                    <div class="h-px bg-slate-200 w-full mb-4"></div>
+                    <p class="text-slate-600 leading-relaxed text-xs sm:text-sm mb-6 min-h-0 sm:min-h-[60px]">
+                        ${ins.bio[currentLang]}
+                    </p>
+                    <div class="flex items-center gap-2 text-[9px] sm:text-[10px] font-bold text-indigo-600 uppercase tracking-widest">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                        ${translations[currentLang].specialist}: ${ins.spec[currentLang]}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPricing() {
+            const container = document.getElementById('pricing-grid');
+            container.innerHTML = PRICING_DATA.map(plan => `
+                <div class="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-8 sm:p-10 border flex flex-col ${plan.recommended ? 'border-indigo-600 shadow-2xl lg:scale-105 relative z-10' : 'border-slate-200 shadow-lg'} transition-all">
+                    ${plan.recommended ? `
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                        ${translations[currentLang].bestForResults}
+                    </div>` : ''}
+                    <h3 class="text-lg sm:text-xl font-bold mb-1">${plan.name[currentLang]}</h3>
+                    <p class="text-indigo-600 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] mb-4">${plan.freq[currentLang]}</p>
+                    <div class="mb-6 sm:mb-8">
+                        <span class="text-4xl sm:text-5xl font-black text-slate-900">
+                            ${typeof plan.monthly === 'number' ? '₹' + (isAnnual ? plan.annual : plan.monthly) : plan.monthly[currentLang] || plan.monthly}
+                        </span>
+                        ${typeof plan.monthly === 'number' ? `<span class="text-slate-400 font-bold text-xs sm:text-sm ml-1">${translations[currentLang].perMonth}</span>` : ''}
+                    </div>
+                    <ul class="space-y-3 sm:space-y-4 mb-8 sm:mb-10 grow">
+                        ${plan.features.map(f => `
+                            <li class="flex items-start gap-3 text-xs sm:text-sm text-slate-600 font-medium">
+                                <div class="text-indigo-500 mt-0.5 shrink-0">${document.getElementById('icon-check').outerHTML}</div>
+                                <span>${f[currentLang]}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <button onclick="toggleModal(true)" class="w-full py-3.5 sm:py-4 rounded-xl font-bold transition-all uppercase tracking-widest text-[10px] ${plan.recommended ? 'bg-indigo-600 text-white shadow-lg hover:bg-indigo-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'}">
+                        ${translations[currentLang].joinNow}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderFaqs() {
+            const container = document.getElementById('faq-container');
+            container.innerHTML = FAQS_DATA.map((faq, idx) => `
+                <div class="faq-item bg-white rounded-xl sm:rounded-2xl border border-slate-100 overflow-hidden transition-all duration-300">
+                    <button onclick="toggleFaq(${idx})" class="w-full flex items-center justify-between p-5 sm:p-6 text-left focus:bg-slate-50 outline-none">
+                        <span class="font-bold text-slate-800 text-sm sm:text-base pr-4">${faq.q[currentLang]}</span>
+                        <div class="chevron-icon transition-transform duration-300 shrink-0">
+                            ${document.getElementById('icon-chevron-down').outerHTML}
+                        </div>
+                    </button>
+                    <div class="faq-content">
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">${faq.a[currentLang]}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize
+        window.onload = () => {
+            setLanguage('or');
+        };
+    </script>
+</body>
+</html>
